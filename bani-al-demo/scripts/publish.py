@@ -1,6 +1,9 @@
 """Publish an approved demo to GitHub Pages and record the link. Run ONLY after the user said OK to the screenshots.
 
     python publish.py <slug>            publish (or update) the demo
+    python publish.py <slug> --test     publish with the test WhatsApp number, for the user to look at only:
+                                        nothing is written to the Excel file or demos.md; publish again
+                                        without --test after the real number is set (same link)
     python publish.py --setup           first time only: create the public Pages repo (also done automatically)
 
 - Repo: github.com/<github_user>/<pages_repo> (public), local clone <preview_dir>. robots.txt blocks crawlers,
@@ -119,7 +122,8 @@ def main():
         setup(s)
         return
     slug = sys.argv[1]
-    if s["whatsapp"].endswith("000000") or s["brand_name"].strip().upper() == "TEST":
+    test = "--test" in sys.argv[2:]
+    if not test and (s["whatsapp"].endswith("000000") or s["brand_name"].strip().upper() == "TEST"):
         print("TEST_NUMBER: set our real WhatsApp + brand name (paths.py --set ...), rebuild, check, then publish")
         sys.exit(2)
     cdir = client_dir(slug)
@@ -152,6 +156,11 @@ def main():
         time.sleep(10)
 
     today = datetime.date.today().isoformat()
+    if test:
+        print(f"link: {link}")
+        print("live" if live else "NOT_LIVE_YET")
+        print("TEST publish: not recorded in Excel or demos.md")
+        return
     lead = json.loads((cdir / "lead.json").read_text(encoding="utf-8"))
     xl = record_excel(s, lead, link, today)
     demos = DATA / "demos.md"
