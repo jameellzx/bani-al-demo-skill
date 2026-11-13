@@ -13,6 +13,7 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 
 SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
@@ -72,9 +73,9 @@ DEFAULTS = {
     "brand_name": "",             # our name shown on the demo banner
     "banner_text": "ديمو مسوّى لـ {client} — كلمنا نخليه موقعك الحقيقي",
     "wa_message": "هلا، شفت الديمو حق {client}",
-    "github_user": "jameellzx",
+    "github_user": "",            # empty = the account signed in to GitHub CLI (gh auth login)
     "pages_repo": "preview",
-    "preview_dir": "C:/dev/preview",
+    "preview_dir": "",            # empty = <data>/preview (local clone of the Pages repo)
     "templates_dir": str(HOME / "Desktop" / "1st projet" / "قوالب"),
     "katib_dir": str(HOME / "Desktop" / "1st projet" / "katib-clients"),
     "excel": str(AB / "الباحث.xlsx"),
@@ -83,11 +84,24 @@ DEFAULTS = {
 }
 
 
+def _gh_user() -> str:
+    """Login of the account signed in to GitHub CLI, or "" if gh is missing or signed out."""
+    try:
+        r = subprocess.run(["gh", "api", "user", "--jq", ".login"], capture_output=True, text=True, timeout=20)
+        return r.stdout.strip() if r.returncode == 0 else ""
+    except Exception:
+        return ""
+
+
 def settings() -> dict:
     s = dict(DEFAULTS)
     f = DATA / "settings.json"
     if f.exists():
         s.update({k: v for k, v in json.loads(f.read_text(encoding="utf-8-sig")).items() if v not in (None, "")})
+    if not s["github_user"]:
+        s["github_user"] = _gh_user()
+    if not s["preview_dir"]:
+        s["preview_dir"] = str(DATA / "preview")
     if not s["clone_kit_scripts"]:
         s["clone_kit_scripts"] = _clone_kit_scripts()
     return s
@@ -116,6 +130,8 @@ def check() -> list[str]:
         missing.append("whatsapp: our WhatsApp number (digits with country code) -> save_settings(whatsapp=...)")
     if not s["brand_name"]:
         missing.append("brand_name: our name for the demo banner")
+    if not s["github_user"]:
+        missing.append("github_user: GitHub CLI is not signed in -> run gh auth login (the user signs in)")
     for k in ("templates_dir", "excel", "ig_state", "clone_kit_scripts"):
         if not s[k] or not os.path.exists(s[k]):
             missing.append(f"{k}: not found ({s[k] or 'empty'})")
