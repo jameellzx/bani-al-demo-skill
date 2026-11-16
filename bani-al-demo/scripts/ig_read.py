@@ -283,6 +283,29 @@ def main():
           f"images: {ok}/{len(jobs)} downloaded")
     print(f"time: {t_ig:.1f}s Instagram + {time.time() - t0 - t_ig:.1f}s images = {time.time() - t0:.1f}s")
     print(f"folder: {root}")
+    site = caption_site(out)
+    if site:
+        (root / "has_site.txt").write_text(site, encoding="utf-8")
+        print(f"HAS_SITE {site}  (a working website written in the bio, link hubs, email or post captions)")
+
+
+def caption_site(out):
+    """A working website of the client found anywhere in what we read: bio links, link hubs, email domain AND the
+    post captions (many shops write their site only under each post). Uses al-bahith's checker. None if none loads."""
+    import subprocess
+    pr = out["profile"]
+    text = (pr.get("biography") or "") + "\n" + "\n".join(p.get("caption") or "" for p in out["posts"])
+    links = [l if isinstance(l, str) else (l.get("url") or "") for l in [pr.get("external_url")] + list(pr.get("bio_links") or []) if l]
+    info = {"bio": text, "links": links, "emails": [pr["business_email"]] if pr.get("business_email") else []}
+    # run in al-bahith's own folder: both skills have a paths.py, so importing here would pick the wrong one
+    code = ("import json,sys\nfrom ig_search import working_site\ni=json.loads(sys.stdin.read())\n"
+            "print(working_site({'website_candidates': i['links']}, i) or '')")
+    try:
+        r = subprocess.run([sys.executable, "-c", code], input=json.dumps(info), capture_output=True, text=True,
+                           encoding="utf-8", timeout=300, cwd=str(pathlib.Path.home() / ".claude/skills/al-bahith/scripts"))
+        return (r.stdout.strip().splitlines() or [""])[-1] or None
+    except Exception:
+        return None
 
 
 if __name__ == "__main__":

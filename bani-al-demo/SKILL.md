@@ -39,6 +39,9 @@ avatar, beliefs and website-copy files before writing `fill.json`.
 Opens the profile like a person (al-bahith's session), so never run it while al-bahith reads Instagram.
 - `NO_SESSION` / `LOGIN_WALL`: «لازم تسجل دخول انستقرام مرة وحدة بنفسك» → `python ~/.claude/skills/al-bahith/scripts/ig_profile.py --login`
   (the user types their own password, never Claude). Then run again.
+- `HAS_SITE <url>` (also `ig/has_site.txt`): the client already has a working website, found in the bio, a link hub,
+  the email domain or **the post captions** (many shops write their site only under each post). Stop: no demo for a
+  lead with a working site. Tell the user and mark the lead in الباحث.xlsx (عنده موقع؟ = نعم).
 - `RATE_LIMIT`: stop, tell the user, try later. `PARSE_FAIL`: Instagram changed its page; fix `profile_object` /
   the embedded keys in `ig_read.py` and say so.
 
