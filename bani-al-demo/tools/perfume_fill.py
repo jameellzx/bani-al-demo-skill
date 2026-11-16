@@ -43,7 +43,8 @@ def full_sections(p, v, prods, c, sources):
     extra = {"categories", "oud", "home_scent", "gifts", "base", "quotes", "why", "old_way", "base_intro", "oud_detail",
              "home_detail", "proof", "newsletter"}
     photos = [pr["image"] for pr in prods] + p["gram"]["images"] + [p["hero"]["image"], p["cta"]["image"]]
-    photos += sorted(str(x.relative_to(c)).replace("\\", "/") for x in (c / "ig" / "media").glob("p*_1.jpg"))
+    # only photos picked by eye (page.json), never every post: a shop's feed can hold maps, flags, people, memes
+    photos += list(p.get("extra_photos") or [])
     photos = list(dict.fromkeys(photos))
     k = 0
     for sl in json.loads(TPL_SLOTS.read_text(encoding="utf-8"))["slots"]:

@@ -46,7 +46,7 @@ def main():
     name = page["name"]
     fill["hide"] = []
     photos = [p["image"] for p in page["products"]] + page["gram"]["images"] + [page["hero"]["image"], page["cta"]["image"]]
-    photos += sorted(str(p.relative_to(d)).replace("\\", "/") for p in (d / "ig" / "media").glob("p*_1.jpg"))
+    photos += list(page.get("extra_photos") or [])  # hand-picked only
     photos = list(dict.fromkeys(photos))
     slots = json.loads(TPL.read_text(encoding="utf-8"))["slots"]
     hidden = {"categories", "oud", "home_scent", "gifts", "base", "quotes", "why", "old_way", "base_intro",
