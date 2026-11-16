@@ -19,15 +19,20 @@ shopify-clone-kit plugin (1.1.2+, for `slots.json` and `export_html.py` flags), 
 ## 1. Client
 User names a lead (name, @handle or link). `python scripts/lead.py "<it>"` → `slug` + `lead.json`.
 `--list` shows every lead. `MATCHES` → ask which one. `NOT_FOUND` → ask for the Instagram handle.
-A lead that already has «رابط الديمو» → ask: update the old demo (same link) or stop.
+A lead that already has «الموقع التجريبي» → ask: update the old demo (same link) or stop.
 
 ## 2. Template
 List the folders in `<templates_dir>` (قوالب): name, `title` from `template.json`, sections, and show `preview-0-html.jpg`.
 The user picks; never pick for them. No `slots.json` in it → `python <clone_kit_scripts>/save_template.py --slots-only <template>`.
 
-## 3. الكاتب research
-Ask: «في بحث من الكاتب لنفس المجال نستخدمه للكوبي البيعي؟» and list the folders in `<katib_dir>`. Use one only if the
-user names it. None → copy is from Instagram only.
+## 3. الكاتب research (user rule, 2026-11-16)
+**Instagram is the source of truth; الكاتب is how it gets written.** Every fact on the page (products, prices, delivery,
+branches, reviews, the brand's own words) comes from the client's Instagram. Then rewrite those facts better with the
+الكاتب method: the buyer's own words, the avatar's wants and fears, the core beliefs and the offer angle from the
+الكاتب files for that field. الكاتب never adds a fact the client did not post (no invented guarantees, numbers or claims).
+Find the الكاتب folder for the field: a project folder like `<project>/2-الكاتب` (e.g. مشروع-العطور), or one in
+`<katib_dir>`. Ask only if there is none or more than one fits: «في بحث من الكاتب لنفس المجال؟». Read at least the
+avatar, beliefs and website-copy files before writing `fill.json`.
 
 ## 4. Read Instagram (~30 s)
 `python scripts/ig_read.py <handle> --slug <slug>` → `ig/profile.json`, `posts.json` (30), `highlights.json`, `media/`.
@@ -67,7 +72,7 @@ Show the user the phone and desktop screenshots (and the local `site/index.html`
 ## 10. Publish
 `python scripts/publish.py <slug>` (only after the OK; it refuses if the last build has not passed `check.py`).
 First time it creates the public repo `<github_user>/<pages_repo>` with GitHub Pages, robots.txt blocking crawlers and an
-empty root page. Prints the link; writes «رابط الديمو» and «تاريخ الديمو» in الباحث.xlsx and a line in `<data>/demos.md`.
+empty root page. Prints the link; writes «الموقع التجريبي» and «تاريخ الديمو» in الباحث.xlsx and a line in `<data>/demos.md`.
 - `EXCEL_LOCKED`: ask the user to close الباحث.xlsx, then run publish again (same link).
 - `NOT_LIVE_YET`: GitHub Pages is still building; the link works in a few minutes.
 Give the user the link and remind them: the repo is public, so anyone with the link (or browsing the repo) can see it.

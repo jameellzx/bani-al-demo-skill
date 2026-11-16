@@ -49,7 +49,8 @@ def main():
         for n, d in enumerate(all_rows, 1):
             print(f"{n}. {d.get('الاسم')} | @{d['_handle']} | {d.get('المجال') or ''} | "
                   f"{d.get('عدد المتابعين') or ''} followers | {d['_sheet']}"
-                  + (f" | demo: {d['رابط الديمو']}" if d.get("رابط الديمو") else ""))
+                  + (f" | demo: {d.get('الموقع التجريبي') or d.get('رابط الديمو')}"
+                     if d.get("الموقع التجريبي") or d.get("رابط الديمو") else ""))
         return
     q = sys.argv[1].strip()
     qh = handle_of(q) or q.lstrip("@").lower()

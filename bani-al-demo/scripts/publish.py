@@ -10,7 +10,7 @@
   the root index.html is empty (no list of clients), every demo page has a noindex meta.
 - Each client gets one folder <slug>-<6 random letters>; publishing the same client again updates that folder,
   so the link stays the same.
-- Then: waits until the live link answers 200, writes «رابط الديمو» and «تاريخ الديمو» on the client's row
+- Then: waits until the live link answers 200, writes «الموقع التجريبي» and «تاريخ الديمو» on the client's row
   in الباحث.xlsx, and appends the link to <data>/demos.md (local only).
 Status words: NOT_CHECKED (check.py has not passed), EXCEL_LOCKED (close the Excel file and run again; the page
 is already live), NOT_LIVE_YET (GitHub Pages still building; link printed anyway).
@@ -91,7 +91,10 @@ def record_excel(s, lead, link, today):
     ws = wb[lead["_sheet"]]
     head = [c.value for c in ws[1]]
     cols = {}
-    for name in ("رابط الديمو", "تاريخ الديمو"):
+    if "رابط الديمو" in head and "الموقع التجريبي" not in head:  # old column name -> the one al-bahith uses
+        ws.cell(row=1, column=head.index("رابط الديمو") + 1, value="الموقع التجريبي")
+        head[head.index("رابط الديمو")] = "الموقع التجريبي"
+    for name in ("الموقع التجريبي", "تاريخ الديمو"):
         if name not in head:
             ws.cell(row=1, column=len(head) + 1, value=name)
             head.append(name)
@@ -105,7 +108,7 @@ def record_excel(s, lead, link, today):
             if f"instagram.com/{lead['_handle']}" in v:
                 row = r
                 break
-    ws.cell(row=row, column=cols["رابط الديمو"], value=link).hyperlink = link
+    ws.cell(row=row, column=cols["الموقع التجريبي"], value=link).hyperlink = link
     ws.cell(row=row, column=cols["تاريخ الديمو"], value=today)
     try:
         wb.save(path)
