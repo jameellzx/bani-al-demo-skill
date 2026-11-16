@@ -16,6 +16,10 @@ shopify-clone-kit plugin (1.1.2+, for `slots.json` and `export_html.py` flags), 
 «شنو رقم الواتساب اللي تبي الأزرار تفتحه، وشنو الاسم اللي يطلع على شريط الديمو؟» then
 `python scripts/paths.py --set whatsapp=965XXXXXXXX "brand_name=..."`. Kept only in `<data>/settings.json`, never in git.
 
+`clone_kit_scripts` must point at an `export_html.py` that knows the `asset_url` filter (the perfume template needs it).
+The plugin cache 1.1.2 does not; the shopify-clone-kit repo checkout does (`<repo>/plugins/shopify-clone-kit/skills/theme-clone/scripts`).
+Build error `unknown filter 'asset_url'` → set that path with `paths.py --set clone_kit_scripts=...`.
+
 ## 1. Client
 User names a lead (name, @handle or link). `python scripts/lead.py "<it>"` → `slug` + `lead.json`.
 `--list` shows every lead. `MATCHES` → ask which one. `NOT_FOUND` → ask for the Instagram handle.
@@ -62,6 +66,20 @@ hide the section. Typical gaps: founder story, press logos, reviews, prices, gui
 Write `<client>/fill.json` exactly as `references/fill-guide.md` says (read it every run): every content slot, `color_map` for
 every leftover colour, fonts, hidden sections, block counts, `sources` for every fact slot used.
 
+### Perfume template (perfume-oud-store): short way (2026-11-16)
+For the perfume-oud-store template don't write `fill.json` by hand. Write `<client>/page.json` (the shop's facts and copy:
+name, logo, colours, fonts, hero, 4 strip lines, up to 6 products with price + source post, FAQ from the bio/captions,
+CTA, 5 gallery photos, optional `extra_photos`, `allow_text`) and run `bash tools/go.sh <slug> [<slug> ...]`
+(fill + build + check). `tools/perfume_fill.py` turns page.json into fill.json:
+- **Every section is shown except `offer` («جرّب أول. ادفع بعدين»)** (user rule). The sections Instagram can't fill get
+  `tools/perfume_full_copy.py`: buying tips and education from the الكاتب research only, never a claim about the shop
+  (no reviews, hour numbers, guarantees, "we test"). Gifts and home scent show the shop's real products.
+- **Pictures only from photos you picked by eye** (hero, products, gallery, CTA, `extra_photos`), never every post:
+  feeds hold maps, flags, people and memes (an India map once landed on an oud shop's page).
+- Plain field words the template also uses (العود، عطور، بخور…) are allowed in the leftover check.
+`tools/full_example.py <slug> <new-slug>` makes a look-only copy with the template's own sample copy (never publish it).
+Many clients in one go: read Instagram for all of them first (one at a time, paced), then write each page.json.
+
 ## 8. Build + check
 `python scripts/build.py <slug>` then `python scripts/check.py <slug>`. Check FAIL → fix `fill.json`, build, check again.
 Check PASS → still look at `shots/phone_top.jpg`, `shots/phone.jpg` and `shots/desktop.jpg` yourself: text readable on
@@ -78,6 +96,10 @@ First time it creates the public repo `<github_user>/<pages_repo>` with GitHub P
 empty root page. Prints the link; writes «الموقع التجريبي» and «تاريخ الديمو» in الباحث.xlsx and a line in `<data>/demos.md`.
 - `EXCEL_LOCKED`: ask the user to close الباحث.xlsx, then run publish again (same link).
 - `NOT_LIVE_YET`: GitHub Pages is still building; the link works in a few minutes.
+- `PAGES_BUILD_PENDING`: many pushes in a row can leave the Pages build "errored" while the old page still loads.
+  publish.py asks GitHub to build again once; if it still shows, run `gh api -X POST repos/<user>/<repo>/pages/builds`
+  and check the live page has the new content (not just that it answers).
+- Republishing a client keeps the same link.
 Give the user the link and remind them: the repo is public, so anyone with the link (or browsing the repo) can see it.
 
 ## Rules

@@ -117,6 +117,24 @@ def record_excel(s, lead, link, today):
     return "OK"
 
 
+def pages_built(s, tries=40):
+    """Wait for the GitHub Pages build of the last push. Many pushes in a row can leave the latest build
+    "errored" while the old page still answers 200 (seen 2026-11-16): then ask GitHub to build again, once."""
+    api = f"repos/{s['github_user']}/{s['pages_repo']}/pages/builds"
+    retried = False
+    time.sleep(15)  # let GitHub register the new push first
+    for _ in range(tries):
+        st = run(["gh", "api", f"{api}/latest", "--jq", ".status"], check=False).stdout.strip()
+        if st == "built":
+            return True
+        if st == "errored" and not retried:
+            run(["gh", "api", "-X", "POST", api], check=False)
+            retried = True
+        time.sleep(10)
+    print("PAGES_BUILD_PENDING: GitHub Pages has not finished building; check the link again in a few minutes")
+    return False
+
+
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -148,6 +166,7 @@ def main():
         run(["git", "push", "origin", "main"], cwd=local)
 
     link = f"https://{s['github_user']}.github.io/{s['pages_repo']}/{folder}/"
+    pages_built(s)
     live = False
     for _ in range(36):  # up to ~6 minutes for the Pages build
         try:
